@@ -1,16 +1,26 @@
 {
-  "name": "lib",
+  "name": "@jott/lib",
   "version": "1.0.0",
-  "description": "Jott common functionality",
+  "description": "Jott libraries",
+  "private": "true",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run tsc && node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc --project tsconfig.json"
   },
   "keywords": [],
   "author": "Trevor James Nangosha",
   "license": "ISC",
   "dependencies": {
+    "crypto-browserify": "^3.12.0",
+    "dayjs": "^1.11.7",
+    "dotenv": "^16.0.3",
     "knex": "^2.4.2",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "stream-browserify": "^3.0.0",
+    "timers-browserify": "^2.0.12"
   }
 }
