@@ -1,23 +1,30 @@
 .App {
-  /* background-color: pink; */
   display: flex;
   justify-content: center;
   width: 100vw;
   height: 100vh;
 }
 
-.text-editor{
-  margin: 2rem 2rem auto auto;
+.text-editor-container{
+  display: flex;
+  flex-direction: column;
   width: 70%;
-  height: 80vh;
-  /* background-color: cyan; */
+  height: 90vh;
+}
+
+.text-editor{
+  margin: 2rem 2rem 2rem auto;
+  width: 95%;
+  height: 80%; 
 }
 
 .date-picker{
   margin: 2rem auto auto 2rem;
   width: 20%;
   height: 40vh;
-  background-color: rgb(224, 236, 108);
 }
 
-/* margin: top right bottom left */
+.save-button{
+  margin: 2rem 2rem 2rem auto;
+}
+
