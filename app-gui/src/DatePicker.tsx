@@ -9,7 +9,6 @@ dayjs.extend(customParseFormat)
 export interface DatePickerProps{
     date?: Dayjs;
     handleDateChange: (value: any) => void
-
 }
 
 function DatePicker(props: DatePickerProps){
