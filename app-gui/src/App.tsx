@@ -27,9 +27,10 @@ const onContentChange = (value: string, delta: DeltaStatic, source: any, editor:
 
 const saveEntryToDb = async (entry: JournalEntry) => {
   const date = entry.date.toDate()
+  const dateString_ = new Date(date.getTime()  + Math.abs(date.getTimezoneOffset()*60000))
 
     try {
-      await fetch(`http://${config.HOST}:${config.PORT}/entries?date=${date}`, {
+      await fetch(`http://${config.HOST}:${config.PORT}/entries?date=${dateString_}`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(entry)
@@ -39,11 +40,12 @@ const saveEntryToDb = async (entry: JournalEntry) => {
     }
 }
 
-const getEntryAtDate = async (date: Dayjs, setState: EntryStateDispatch, setTodayState: EntryStateDispatch) => {
+const getEntryAtDate = async (date: Dayjs, setState: EntryStateDispatch) => {
   const dateString = date.toDate()
+  const dateString_ = new Date(dateString.getTime()  + Math.abs(dateString.getTimezoneOffset()*60000))
 
   try {
-    const response = await fetch(`http://${config.HOST}:${config.PORT}/entries?date=${dateString}`, {
+    const response = await fetch(`http://${config.HOST}:${config.PORT}/entries?date=${dateString_}`, {
       headers: { Accept: 'application/json' },
     });
     const data: JournalEntry[] = await response.json()
@@ -51,14 +53,11 @@ const getEntryAtDate = async (date: Dayjs, setState: EntryStateDispatch, setToda
 
     if (data.length && isDateToday(date)){
       setState({...entry, date: dayjs(entry.date)})
-      setTodayState({...entry, date: dayjs(entry.date)})
     }else if(data.length) {
       setState({...entry, date: dayjs(entry.date)})
     } else {
-      // create a new entry object for this specific date.
       let setId = uuidv4()
       setState({date: date, id: setId, content: ""})
-      setTodayState({date: date, id: setId, content: ""})
     }
   } catch (error) {
     return console.error(error);
@@ -66,9 +65,8 @@ const getEntryAtDate = async (date: Dayjs, setState: EntryStateDispatch, setToda
 }
 
 function App() {  
-  const defaultState = {id: uuidv4(), date: dayjs(), content: "", }
+  const defaultState = {id: uuidv4(), date: dayjs(new Date()), content: "", }
   const [state, setState] = useState<JournalEntry>(defaultState)
-  const [, setTodayState] = useState<JournalEntry>(defaultState)
   const [savedContent, setSavedContent] = useState("")
   const [changeCount, setChangeCount] = useState(0)
   
@@ -88,7 +86,7 @@ function App() {
     if(changeCount === 0){
       // run the first time the component is rendered.
       // to see if we have any instance of the current date.
-      getEntryAtDate(state.date, setState, setTodayState)
+      getEntryAtDate(state.date, setState)
     }
     setChangeCount(count => count + 1)
 
@@ -101,7 +99,7 @@ function App() {
   }
 
   const handleDateChange = async (value: any) => {
-      await getEntryAtDate(dayjs(value.$d), setState, setTodayState)
+      await getEntryAtDate(dayjs(value.$d), setState)
   }
 
  
