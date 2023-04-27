@@ -1,8 +1,8 @@
 import knex, {Knex} from "knex"
+import { DbConfig } from "./config";
+import { DB_ERROR } from '@jott/lib/types'
 
 export type KnexConnection = Knex;
-
-// export interface KnexConnection_ extends Knex{}
 
 export class DbConnectionError extends Error{
     constructor(message: string){
@@ -18,54 +18,53 @@ export class TableNotFoundError extends Error{
     }
 }
 
-// interface DbConfig{
-//     host: string | undefined;
-//     port: number | undefined;
-//     user: string | undefined;
-//     password: string | undefined;
-//     database:string
-// }
+export const connectDb = async (client: string, config: DbConfig): Promise<KnexConnection> => {
+    let connection_: KnexConnection;
+    let config_;
 
-const dbConfig_ = {
-    host : "127.0.0.1",
-    port : 3306,
-    user : "",
-    password : "",
-    database : 'jott'
-}
-
-export const connectDb = async (): Promise<KnexConnection> => {
-    let conn_: KnexConnection = knex({
-        client: 'sqlite',
-        connection: {}
-    })
+    switch (client) {
+        case "sqlite":
+            config_ = {}
+            break;
+        case "mysql":
+            config_ = config
+            break;
+        default:
+            throw new DbConnectionError("Could not connect to database. Please provide a valid client.")
+     }
     
-    const connection: KnexConnection = knex({
-        client: 'mysql',
-        connection: dbConfig_
+    connection_ = knex({
+        client,
+        connection: config_
     })
 
-    const result = await Promise.all([isConnectionSuccessful(connection)])
-    if(result[0]) return connection
+    try {
+        const result = await Promise.all([isConnectionSuccessful(connection_)])
+        if (!result) {
+            throw new DbConnectionError(`Could not connect to: ${client}`)
+        }
+    } catch (error: any) {
+        console.error(error.message)
+    }
 
-    return conn_;
+    return connection_;
 }
 
 const isConnectionSuccessful = async (conn: KnexConnection) => {
-    // there could be a bug with this function.
-    // look into it later.
     try {
         await conn('entries').select('*')
         console.log("Database connection successful.")
-
         return true
     } catch (error: any) {
-        if(error.code === "ECONNREFUSED") {
-            throw new DbConnectionError("Could not establish database connection.")
-        }
-        if(error.code === "ER_NO_SUCH_TABLE") {
-            createTable(conn, "entries")
-            return true
+        switch (error) {
+            case DB_ERROR.ECONNREFUSED:
+                throw new DbConnectionError("Could not establish database connection.")
+                break;
+            case DB_ERROR.ER_NO_SUCH_TABLE:
+                createTable(conn, "entries")
+                return true
+            default:
+                break;
         }
     }
 
@@ -86,8 +85,8 @@ export const createTable = (conn: KnexConnection, name: string) => {
                         table.primary(['id'])
                     })
                     console.log(`Table: ${name} created.`)
-                } catch (error) {
-                    console.error('Could not create table..... %s', error)
+                } catch (error: any) {
+                    console.error('Could not create table..... %s', error.message)
                 }
             }
         })         
@@ -95,4 +94,30 @@ export const createTable = (conn: KnexConnection, name: string) => {
 
 const tableExists = (conn: KnexConnection, table: string) => {
     return conn.schema.hasTable(table);
+}
+
+export const saveOrUpdateEntry = async (conn: KnexConnection, entry: any,) => {
+    const result = await entryExists(conn, entry)
+    if (!result) {
+        try {
+            await conn('entries').insert({...entry})
+        } catch (error) {
+            console.error(error)
+        }  
+    } else {
+        const {content, id} = entry
+        await conn('entries').where("id", id).update("content", content)
+    }
+}
+
+const entryExists = async (conn: KnexConnection, entry: any) => {
+    const date = entry.date
+    try {
+        const result = await conn('entries').select('*').where('date', date)  
+        if(result.length) return true
+        return false
+    } catch (error) {
+        console.error(error)
+        return false
+    }
 }
