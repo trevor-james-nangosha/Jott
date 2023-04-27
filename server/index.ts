@@ -1,9 +1,10 @@
-import express, { json, urlencoded, Request, Response } from 'express';
-import { connectDb, KnexConnection} from "./db";
+import express, { json, urlencoded, Request } from 'express';
+import { connectDb, KnexConnection, saveOrUpdateEntry} from "./db";
+import config_ from './config';
 
+let conn: KnexConnection;
 const cors = require('cors')
 const app = express();
-const connection = connectDb();
 
 app.use(cors())
 app.use(json())
@@ -14,62 +15,48 @@ app.get('/', (req, res) => {
 })
 
 app.get('/entries', async (req, res) => {
-    let date = req.query.date
-    let id = req.query.id
-    const conn_ = (await Promise.all([connection]))[0]
+    let date= new Date((req.query.date as string)).toISOString().slice(0, 11)
+    let id = req.query?.id
 
     if (date) {
-        res.json(await conn_('entries').select('*').where('date', date))
+        res.json(await conn('entries').select('*').where('date', date))
     } else if (id) {
-        res.json(await conn_('entries').select('*').where('id', id))
+        res.json(await conn('entries').select('*').where('id', id))
     }
 })
 
 app.post('/entries', async (req, res) => {
-    const conn = (await Promise.all([connection]))[0]
     const entry = parseEntryFromRequest(req)
-    await saveEntry(conn, entry, res)
+    
+    await saveOrUpdateEntry(conn, entry)
+    .then(() => {
+        res.status(201).send({message: "Entry saved successfully"})
+    }).catch(error => {
+        console.error(error)
+        res.status(500).send({message: "Could not save entry."})
+    })
 
 })
 
-app.listen(4001, () => {
+app.listen(4001, async () => {
     console.log('Server has been started!!!!!!!');
+    let connection = await connectDb('mysql', config_);
+    conn = connection
 })
 
 const parseEntryFromRequest = (req: Request) => {
     const body = req.body
+    let dateString = parseDate((body.date as string))
+
     return {
         id: body.id,
-        date: body.date.slice(0, 10),
+        date: dateString,
         content: body.content
     }
 }
 
-const saveEntry = async (conn: KnexConnection, entry: any, res: Response) => {
-    const result = await entryExists(conn, entry)
-    console.log(`Exists: ${result}`)
-    if (!result) {
-        try {
-            await conn('entries').insert({...entry})
-            res.json( {message: "Entry saved successfully."} )
-        } catch (error) {
-            console.error(error)
-            res.status(500).json( {message: "Entry could not be saved.", error} )
-        }  
-    } else {
-        res.status(500).json( {message: "Entry could not be saved. Already exists."} )
-    }
-}
-
-const entryExists = async (conn: KnexConnection, entry: any) => {
-    const date = entry.date
-    try {
-        const result = await conn('entries').select('*').where('date', date)  
-        console.log(`Result: ${result}`) 
-        if(result.length) return true
-        return false
-    } catch (error) {
-        console.error(error)
-        return false
-    }
+const parseDate = (date: string) => {
+    let date_ = new Date(date)
+    let dateString = new Date(date_.getTime()  + Math.abs(date_.getTimezoneOffset()*60000)).toISOString().slice(0, 11)
+    return dateString
 }
