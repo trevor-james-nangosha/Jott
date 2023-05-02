@@ -8,8 +8,9 @@ import ReactQuill from 'react-quill';
 import dayjs, { Dayjs } from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import config from './config';
+import useGetEntry from './hooks/useGetEntry';
 
-type EntryStateDispatch = React.Dispatch<React.SetStateAction<JournalEntry>>
+export type EntryStateDispatch = React.Dispatch<React.SetStateAction<JournalEntry>>
 
 export function isDateToday(date: Dayjs): boolean {
   //TODO; move this to the lib/utils file.
@@ -67,8 +68,11 @@ const getEntryAtDate = async (date: Dayjs, setState: EntryStateDispatch) => {
 function App() {  
   const defaultState = {id: uuidv4(), date: dayjs(new Date()), content: "", }
   const [state, setState] = useState<JournalEntry>(defaultState)
+  
   const [savedContent, setSavedContent] = useState("")
   const [changeCount, setChangeCount] = useState(0)
+  const entry = useGetEntry(state.date, setState)
+  console.log(entry)
   
   useEffect(() => {
     setState(prevState => {
