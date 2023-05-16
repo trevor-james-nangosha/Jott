@@ -1,15 +1,12 @@
 import dayjs, { Dayjs } from 'dayjs'
-import { EntryStateDispatch, isDateToday } from '../App'
+import { EditorStateDispatch, EntryStateDispatch, isDateToday } from '../App'
 import { JournalEntry } from '@jott/lib/types'
 import { v4 as uuidv4 } from 'uuid';
 import config from '../config';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { EditorState, ContentState } from 'draft-js';
 
-const useGetEntry = (date: Dayjs, setState: EntryStateDispatch) => {
-    // const defaultState = {id: uuidv4(), date: dayjs(new Date()), content: "", }
-    // how would you implement your own useState functionality, where you have a variable and a method that
-    // kinda keeps track of some sort of global variable and update it accordingly.
-    // const [entry, setEntry] = useState<JournalEntry>(defaultState)
+const useGetEntry = (date: Dayjs, setState: EntryStateDispatch, setEditorState: EditorStateDispatch) => {
 
     useEffect(() => {
         const getEntryAtDate = (date: Dayjs, setState: EntryStateDispatch) => {
@@ -24,21 +21,27 @@ const useGetEntry = (date: Dayjs, setState: EntryStateDispatch) => {
                 const entry = entries[0] as JournalEntry
                 if (entries.length && isDateToday(date)){
                     setState({...entry, date: dayjs(entry.date)})
+                    setEditorContent(entry.content, setEditorState)
                 }else if(entries.length) {
-                setState({...entry, date: dayjs(entry.date)})
+                    setState({...entry, date: dayjs(entry.date)})
+                    setEditorContent(entry.content, setEditorState)
                 } else {
-                let setId = uuidv4()
-                setState({date: date, id: setId, content: ""})
+                    let setId = uuidv4()
+                    setState({date: date, id: setId, content: ""})
+                    setEditorContent("", setEditorState)
                 }
-                //setEntry({...entry})
             }).catch(error => console.error(error))             
+        }
+
+        const setEditorContent = (text: string, setEditorState: EditorStateDispatch) => {
+            const contentState = ContentState.createFromText(text);
+            const newEditorState = EditorState.createWithContent(contentState);
+            setEditorState(newEditorState);
         }
 
         getEntryAtDate(date, setState)         
         
-    }, [date, setState])
-
-    // return entry
+    }, [date, setEditorState, setState])
 }
 
 export default useGetEntry
