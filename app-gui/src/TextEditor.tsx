@@ -1,20 +1,25 @@
-import { DeltaStatic } from 'quill';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import SaveButton from './SaveButton';
+import { Editor } from 'react-draft-wysiwyg';
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 export interface TextEditorProps{
-    defaultValue?: string;
-    value?: ReactQuill.Value;
-    handleContentChange?: (value: string, delta: DeltaStatic, source: any, editor: ReactQuill.UnprivilegedEditor) => void
-    className?: string;
-    onClick?: () => void
+    editorState?: any;
+    setEditorState?: any;
+    wrapperClassName?: string;
+    editorClassName?: string;
+    toolbarClassName?: string;
   }
 
 export default function TextEditor(props: TextEditorProps){
     return (
-        <div className={props.className}>
-            <ReactQuill className="text-editor" theme="snow" value={props.value} onChange={props.handleContentChange} />
-            <SaveButton onClick={props.onClick} />
-        </div>)
+        <>
+            <Editor editorState={props.editorState}
+                onEditorStateChange={props.setEditorState}
+                wrapperClassName="text-editor-container"
+                editorClassName="text-editor"
+                toolbar={{
+                    options: ['inline']
+                }}
+                toolbarClassName="toolbar-class" />
+        </>
+    )
 }
