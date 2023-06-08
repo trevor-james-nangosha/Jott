@@ -2,11 +2,11 @@
   "name": "@jott/server",
   "version": "1.0.0",
   "description": "The application server for the Jott application",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc --project tsconfig.json",
-    "start": "npm run tsc && npx nodemon index.ts"
+    "start": "npm run migrations && npm run tsc && npx nodemon index.ts",
+    "migrations": "knex migrate:latest"
   },
   "keywords": [],
   "license": "ISC",

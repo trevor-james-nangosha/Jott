@@ -40,7 +40,7 @@ app.post('/entries', async (req, res) => {
 
 app.listen(4001, async () => {
     console.log('Server has been started!!!!!!!');
-    let connection = await connectDb('mysql', config_);
+    let connection = await connectDb(config_);
     conn = connection
 })
 

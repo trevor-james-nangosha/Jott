@@ -3,6 +3,7 @@ import { DbConfig } from "./config";
 import { DB_ERROR } from '@jott/lib/types'
 
 export type KnexConnection = Knex;
+const migrationDir = `${__dirname}/migrations`;
 
 export class DbConnectionError extends Error{
     constructor(message: string){
@@ -18,30 +19,14 @@ export class TableNotFoundError extends Error{
     }
 }
 
-export const connectDb = async (client: string, config: DbConfig): Promise<KnexConnection> => {
-    let connection_: KnexConnection;
-    let config_;
-
-    switch (client) {
-        case "sqlite":
-            config_ = {}
-            break;
-        case "mysql":
-            config_ = config
-            break;
-        default:
-            throw new DbConnectionError("Could not connect to database. Please provide a valid client.")
-     }
-    
-    connection_ = knex({
-        client,
-        connection: config_
-    })
+export const connectDb = async (config: DbConfig): Promise<KnexConnection> => {
+    let connection_ = knex(config)
+    // await migrateLatest(connection_)
 
     try {
         const result = await Promise.all([isConnectionSuccessful(connection_)])
         if (!result) {
-            throw new DbConnectionError(`Could not connect to: ${client}`)
+            throw new DbConnectionError(`Could not connect to: ${config.client}`)
         }
     } catch (error: any) {
         console.error(error.message)
@@ -120,4 +105,11 @@ const entryExists = async (conn: KnexConnection, entry: any) => {
         console.error(error)
         return false
     }
+}
+
+export async function migrateLatest(conn: KnexConnection, disableTransactions = false) {
+	await conn.migrate.latest({
+		directory: migrationDir,
+		disableTransactions,
+	});
 }
