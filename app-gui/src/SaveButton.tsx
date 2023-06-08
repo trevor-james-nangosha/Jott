@@ -4,7 +4,7 @@ import { TextEditorProps } from "./TextEditor"
 const SaveButton = (props: TextEditorProps) => {
     return (
     <div className="save-button">
-        <Button className="save-button" variant="contained" size="medium" onClick={props.onClick}>Save</Button>
+        <Button className="save-button" variant="contained" size="medium" >Save</Button>
     </div>)
 }
 
