@@ -1,8 +1,8 @@
 .env
-*.js
 
 # dependencies
 node_modules/
+dist/
 /.pnp
 .pnp.js
 
