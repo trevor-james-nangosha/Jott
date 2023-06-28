@@ -2,6 +2,7 @@
   "name": "@jottt/lib",
   "version": "1.0.1",
   "description": "Jottt libraries",
+  "types": "./dist/types.d.ts",
   "main": "index.js",
   "scripts": {
     "pre-publish": "npm run tsc",
@@ -12,6 +13,7 @@
   "author": "Trevor James Nangosha",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/cloud-sql-connector": "^0.4.0",
     "cors": "^2.8.5",
     "crypto-browserify": "^3.12.0",
     "dayjs": "^1.11.7",
@@ -19,6 +21,7 @@
     "express": "^4.18.2",
     "knex": "^2.4.2",
     "mysql": "^2.18.1",
+    "mysql2": "^3.4.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream-browserify": "^3.0.0",
