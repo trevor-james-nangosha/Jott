@@ -1,6 +1,6 @@
 import TextEditor from './TextEditor';
 import DatePicker from './DatePicker';
-import { JournalEntry } from "@jott/lib/types"
+import { JournalEntry } from "@jottt/lib"
 import { useEffect, useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,7 +29,7 @@ function App() {
     const contentStateObject = convertToRaw(html)
     
     let blocks = contentStateObject["blocks"]
-    console.log(blocks)
+    // console.log(blocks)
     let newString: string = ""
 
     blocks.forEach(block => {

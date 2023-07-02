@@ -1,4 +1,4 @@
-import { JournalEntry } from '@jott/lib/types'
+import { JournalEntry } from "@jottt/lib"
 import { useEffect} from 'react'
 import config from '../config'
 

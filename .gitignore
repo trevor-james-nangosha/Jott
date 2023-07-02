@@ -1,5 +1,6 @@
 NOTES.md
 assets/
+/.vscode
 
 # dependencies
 node_modules/

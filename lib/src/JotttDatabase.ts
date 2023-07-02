@@ -1,10 +1,11 @@
-import knex from "knex";
+import knex, { Knex } from "knex";
 import { DB_ERROR, DbConfig, KnexConnection, SQLITE_ERRORS } from "./types";
 import { makeDir } from "./utils";
 import { join } from 'path';
 import {homedir} from "os";
-import { open } from 'node:fs';
-import { existsSync } from 'node:fs';
+import { open, existsSync } from 'node:fs';
+import mysql from 'mysql2/promise';
+import { AuthTypes, Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
 
 const APP_BASE_DIR = join(homedir(), "jottt")
 
@@ -25,18 +26,13 @@ export class TableNotFoundError extends Error{
 }
 
 export class JotttDatabase{
-    private config: DbConfig
-    public conn: KnexConnection
-    public migrationDir: string;
+    private conn: KnexConnection
 
-    public constructor(config_: DbConfig, migrationDir_: string){
+    public constructor(conn_: KnexConnection){
         this.createBaseDbFolders()
         this.createDbFiles()
 
-        this.config = config_
-        this.migrationDir = migrationDir_
-        this.conn = this.connectDb(config_)
-        this.testConnection(this.conn)
+        this.conn = conn_
     }
 
     public connectDb(config: DbConfig){
@@ -63,70 +59,65 @@ export class JotttDatabase{
         })
     }
 
-    private async testConnection(conn: KnexConnection){
-        try {
-            await conn('entries').select('*').catch(async error => {
-                console.error(`Error from trying to select from DB: ${error}`)
-                await this.migrateLatest().catch(error => {
-                    console.error(`Error from trying migrations_1: ${error}`)
-                })
-            })
-            // console.log("Database connection successful.")
-        } catch (error: any) {
-            console.error(error.errno === SQLITE_ERRORS.ER_NO_SUCH_TABLE)
-            switch (error) {
-                case DB_ERROR.ECONNREFUSED:
-                    throw new DbConnectionError("Could not establish database connection.")
-                case DB_ERROR.ER_NO_SUCH_TABLE || (error.errno === SQLITE_ERRORS.ER_NO_SUCH_TABLE):
-                    await this.migrateLatest().catch(error => {
-                        console.error(`Error from trying migrations_2: ${error}`)
-                    })
-                    break
-                default:
-                    break;
-            }
-        }
+    
+
+    public async readOperation(date:string|null, id:string|null){
+        let flag = date ? ["date", date]: id ? ["id", id] : undefined
+        // console.log(flag)
+
+        if(!flag) throw new Error(`Please provide a valid search argument. Either one of "id" or "date".`)
+
+        let localEntryResults = await this.conn('entries').select('*').where(flag[0], flag[1]) 
+        return localEntryResults;
+        
+        // if (localEntryResults.length) {
+        //     return localEntryResults
+        // } else {
+        //     // TODO; debug and test this.....'ts too hacky for now.
+        //     let remoteEntryResults: any[] = []
+
+        //     if (flag[0] === "date") {
+        //         remoteEntryResults = await sync.getRemoteEntryByDate(flag[1])
+        //     } else if (flag[0] === "id") {
+        //         remoteEntryResults = await sync.getRemoteEntryById(flag[1])
+        //     }
+    
+        //     return remoteEntryResults
+        // }
     }
 
-    
-    private tableExists(conn: KnexConnection, table: string){
-        return conn.schema.hasTable(table);
+    public async postOperation(entry: any){
+        await this.saveOrUpdateEntry(entry)
     }
     
-     public async saveOrUpdateEntry(entry: any){
-        const result = await this.entryExists(this.conn, entry)
-        if (!result) {
-            try {
-                await this.conn('entries').insert({...entry})
-            } catch (error) {
-                console.error(error)
-            }  
-        } else {
-            const {content, id} = entry
-            await this.conn('entries').where("id", id).update("content", content)
-        }
+    private async saveOrUpdateEntry(entry: any){
+    const result = await this.entryExists(entry)
+    if (!result) {
+        try {
+            await this.conn('entries').insert({...entry}).then(async _ => {
+                // await sync.startBackup(this.conn, this.conn_mysql)
+            })
+        } catch (error) {
+            console.error(error)
+        }  
+    } else {
+        const {content, id} = entry
+        await this.conn('entries').where("id", id).update("content", content).then(async _ => {
+            // await sync.startBackup(this.conn, this.conn_mysql) //TODO; some ugly shit is happening here.
+        })
     }
-    
-    public async entryExists(conn: KnexConnection, entry: any){
+}
+
+    public async entryExists(entry: any){
         const date = entry.date
         try {
-            const result = await conn('entries').select('*').where('date', date)  
+            const result = await this.conn('entries').select('*').where('date', date)  
             if(result.length) return true
             return false
         } catch (error) {
             console.error(error)
             return false
         }
-    }
-    
-    public async migrateLatest(disableTransactions = false) {
-        await this.conn.migrate.latest({
-            directory: this.migrationDir,
-            disableTransactions,
-        }).then(val => {
-            console.log("done running migrations.")
-            console.log(val)
-        });
     }
 
 }

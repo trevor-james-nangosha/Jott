@@ -2,7 +2,7 @@
   "name": "@jottt/lib",
   "version": "1.0.1",
   "description": "Jottt libraries",
-  "types": "./dist/types.d.ts",
+  "types": "./types/main.d.ts",
   "main": "index.js",
   "scripts": {
     "pre-publish": "npm run tsc",
@@ -36,6 +36,7 @@
     "CHANGELOG.md",
     "README.md",
     "index.js",
-    "dist/"
+    "dist/",
+    "types/"
   ]
 }

@@ -1,5 +1,10 @@
+
 import dayjs from 'dayjs'
 import { Knex } from 'knex';
+
+// provide type support for stuff like this that is giving me a hard time
+// import Synchroniser from './Synchroniser';
+// /// <reference path="../@types/" />
 
 export interface JournalBase{
     id: string;
@@ -12,7 +17,7 @@ export interface JournalEntry extends JournalBase{
     updatedAt?: Date;
 }
 
-export enum DB_ERROR {
+export declare enum DB_ERROR {
     ECONNREFUSED            = "ECONNREFUSED",
     ER_NO_SUCH_TABLE      = "ER_NO_SUCH_TABLE",
 }

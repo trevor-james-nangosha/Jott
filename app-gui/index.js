@@ -1,11 +1,13 @@
 require("dotenv").config()
 const { app, BrowserWindow, } = require('electron');
-const {JottApplicationServer} = require("@jottt/lib")
+const {SqliteProvider, JottApplicationServer, Synchroniser} = require("@jottt/lib")
 const { join } = require('path');
 const { format } = require('url');
-const config = require("./config")
+const config = require("./config");
 
-const appServer = new JottApplicationServer(config, "./migrations");
+const sqliteConn = SqliteProvider.getSqliteConnection(config, "./migrations")
+const appServer = new JottApplicationServer(sqliteConn);
+Synchroniser.setSqliteConnection(sqliteConn)
 
 function createWindow() {
     const startUrl = format({
@@ -20,10 +22,16 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            devTools: false
         }
     });
 
+    win.once("ready-to-show", () => {
+        Synchroniser.emitStartBackup();
+    })
+
     win.loadURL(startUrl);
+    win.webContents.openDevTools()
 
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') {

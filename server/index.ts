@@ -31,7 +31,7 @@ app.post('/entries', async (req, res) => {
     await saveOrUpdateEntry(conn, entry)
     .then(() => {
         res.status(201).send({message: "Entry saved successfully"})
-    }).catch(error => {
+    }).catch((error: any) => {
         console.error(error)
         res.status(500).send({message: "Could not save entry."})
     })

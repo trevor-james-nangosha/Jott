@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { EditorStateDispatch, EntryStateDispatch, isDateToday } from '../App'
-import { JournalEntry } from '@jott/lib/types'
+import { JournalEntry } from '@jottt/lib'
 import { v4 as uuidv4 } from 'uuid';
 import config from '../config';
 import { useEffect } from 'react';

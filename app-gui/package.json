@@ -41,7 +41,7 @@
   },
   "scripts": {
     "start": "set BROWSER=none&& react-scripts start",
-    "start-electron": "set ELECTRON_START_URL=http://localhost:3000&& electron .",
+    "start-electron": "electron .",
     "package": "electron-builder build --mac --win -c.extraMetadata.main=build/electron.js --publish never",
     "publish": "electron-builder build --mac --win --publish always",
     "build": "react-scripts build",

@@ -1,8 +1,10 @@
 import express, { json, urlencoded } from "express";
 import cors from "cors";
 import { JotttDatabase } from "./JotttDatabase";
-import { DbConfig } from "./types";
+import { DbConfig, KnexConnection } from "./types";
 import { parseEntryFromRequest } from "./utils";
+import mysql from 'mysql2/promise';
+
 
 export default class JottApplicationServer{
     public app
@@ -10,8 +12,8 @@ export default class JottApplicationServer{
     public serverActive = false
     public db: JotttDatabase;
 
-    public constructor(dbConfig: DbConfig, migrationDir: string){
-        this.db = new JotttDatabase(dbConfig, migrationDir)
+    public constructor(conn: KnexConnection){
+        this.db = new JotttDatabase(conn)
         this.app = express()
         this.app.use(json())
         this.app.use(urlencoded())
@@ -40,19 +42,19 @@ export default class JottApplicationServer{
 
         this.app.get('/entries', async (req, res) => {
             let date= new Date((req.query.date as string)).toISOString().slice(0, 11)
-            let id = req.query?.id
+            let id = req.query?.id as string
         
             if (date) {
-                res.json(await this.db.conn('entries').select('*').where('date', date))
+                res.json(await this.db.readOperation(date, null))
             } else if (id) {
-                res.json(await this.db.conn('entries').select('*').where('id', id))
+                res.json(await this.db.readOperation(null, id))
             }
         })
 
         this.app.post('/entries', async (req, res) => {
-            const entry = parseEntryFromRequest(req)
+            let entry = parseEntryFromRequest(req)
             
-            await this.db.saveOrUpdateEntry(entry)
+            await this.db.postOperation(entry)
             .then(() => {
                 res.status(201).send({message: "Entry saved successfully"})
             }).catch(error => {
