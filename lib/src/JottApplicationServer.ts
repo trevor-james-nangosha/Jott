@@ -1,10 +1,8 @@
 import express, { json, urlencoded } from "express";
 import cors from "cors";
 import { JotttDatabase } from "./JotttDatabase";
-import { DbConfig, KnexConnection } from "./types";
+import { Config, DbConfig, KnexConnection } from "./types";
 import { parseEntryFromRequest } from "./utils";
-import mysql from 'mysql2/promise';
-
 
 export default class JottApplicationServer{
     public app
@@ -12,8 +10,8 @@ export default class JottApplicationServer{
     public serverActive = false
     public db: JotttDatabase;
 
-    public constructor(conn: KnexConnection){
-        this.db = new JotttDatabase(conn)
+    public constructor(conn: KnexConnection, appBaseDir: string){
+        this.db = new JotttDatabase(conn, appBaseDir)
         this.app = express()
         this.app.use(json())
         this.app.use(urlencoded())
@@ -41,14 +39,9 @@ export default class JottApplicationServer{
         })
 
         this.app.get('/entries', async (req, res) => {
-            let date= new Date((req.query.date as string)).toISOString().slice(0, 11)
-            let id = req.query?.id as string
-        
-            if (date) {
-                res.json(await this.db.readOperation(date, null))
-            } else if (id) {
-                res.json(await this.db.readOperation(null, id))
-            }
+            let date = req.query.date as string        
+            res.json(await this.db.readOperation(date, null))
+            
         })
 
         this.app.post('/entries', async (req, res) => {

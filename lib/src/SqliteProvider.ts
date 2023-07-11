@@ -6,18 +6,9 @@ import knex from "knex";
 import { DB_ERROR, DbConfig, KnexConnection, SQLITE_ERRORS } from "./types";
 import { DbConnectionError } from "./JotttDatabase";
 
-
 export default class SqliteProvider{
-    // public static instance: SqliteProvider | undefined;
     private static conn: KnexConnection
     private static migrationDir: string;
-
-    private constructor(config_: DbConfig, migrationDir_: string){
-        // SqliteProvider.conn = this.connectDb(config_)
-        // SqliteProvider.migrationDir = migrationDir_
-
-        // SqliteProvider.testConnection()
-    }
 
     public static getSqliteConnection(config_: DbConfig, migrationDir_: string): KnexConnection {
         if (!SqliteProvider.conn) {

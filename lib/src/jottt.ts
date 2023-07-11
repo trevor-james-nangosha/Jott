@@ -4,6 +4,7 @@ import { isDateToday } from "./utils";
 import Synchroniser from "./Synchroniser";
 import SqliteProvider from "./SqliteProvider";
 import { JournalEntry } from "./types";
+import FileStorage from "./FileStorage";
 
 export {JournalEntry}
 
@@ -16,5 +17,6 @@ module.exports = {
     utils: {
         isDateToday
     },
-    JotttDatabase
+    JotttDatabase,
+    FileStorage
 }

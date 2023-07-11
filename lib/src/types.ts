@@ -47,4 +47,14 @@ export interface DbConfig{
     }
 }
 
+export interface Config{
+    HOST: string;
+    PORT: string;
+    homeDir: string;
+    dbProd: string;
+    dbDev: string;
+    appBaseDir: string;
+    fileStorage: string
+}
+
 export type KnexConnection = Knex;

@@ -4,10 +4,8 @@ import { makeDir } from "./utils";
 import { join } from 'path';
 import {homedir} from "os";
 import { open, existsSync } from 'node:fs';
-import mysql from 'mysql2/promise';
-import { AuthTypes, Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
 
-const APP_BASE_DIR = join(homedir(), "jottt")
+// const APP_BASE_DIR = join(homedir(), "jottt")
 
 // move the database functionality to lib, since if we
 // need to add, say a CLI application, we shall also need to access them
@@ -28,9 +26,9 @@ export class TableNotFoundError extends Error{
 export class JotttDatabase{
     private conn: KnexConnection
 
-    public constructor(conn_: KnexConnection){
-        this.createBaseDbFolders()
-        this.createDbFiles()
+    public constructor(conn_: KnexConnection, appBaseDir: string){
+        this.createBaseDbFolders(appBaseDir)
+        this.createDbFiles(appBaseDir)
 
         this.conn = conn_
     }
@@ -40,8 +38,8 @@ export class JotttDatabase{
         return connection;
     }
 
-    public createDbFiles(){
-        const files = [join(APP_BASE_DIR, "dev", "db-dev.sqlite3"), join(APP_BASE_DIR, "prod", "db-prod.sqlite3")]
+    public createDbFiles(appBaseDir: string){
+        const files = [join(appBaseDir, "dev", "db-dev.sqlite3"), join(appBaseDir, "prod", "db-prod.sqlite3")]
         files.forEach(file => {
             if (!existsSync(file)) {
                 open(file, 'w', function (err, _) {
@@ -52,8 +50,8 @@ export class JotttDatabase{
         })
     }
 
-    public createBaseDbFolders(){
-        const baseFolders = [join(APP_BASE_DIR, "dev"), join(APP_BASE_DIR, "prod")]
+    public createBaseDbFolders(appBaseDir: string){
+        const baseFolders = [join(appBaseDir, "dev"), join(appBaseDir, "prod")]
         baseFolders.forEach(path => {
             makeDir(path)
         })
@@ -95,16 +93,13 @@ export class JotttDatabase{
     if (!result) {
         try {
             await this.conn('entries').insert({...entry}).then(async _ => {
-                // await sync.startBackup(this.conn, this.conn_mysql)
             })
         } catch (error) {
             console.error(error)
         }  
     } else {
         const {content, id} = entry
-        await this.conn('entries').where("id", id).update("content", content).then(async _ => {
-            // await sync.startBackup(this.conn, this.conn_mysql) //TODO; some ugly shit is happening here.
-        })
+        await this.conn('entries').where("id", id).update("content", content)
     }
 }
 

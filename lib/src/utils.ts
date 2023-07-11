@@ -12,19 +12,9 @@ export function isDateToday(date: Dayjs): boolean {
 // ------------------------- request utils -------------------------------
 export function parseEntryFromRequest(req: Request){
       const body = req.body
-      let dateString = parseDate((body.date as string))
+      const {id, date, content} = body
   
-      return {
-          id: body.id,
-          date: dateString,
-          content: body.content
-      }
-  }
-  
-  export function parseDate(date: string){
-      let date_ = new Date(date)
-      let dateString = new Date(date_.getTime()  + Math.abs(date_.getTimezoneOffset()*60000)).toISOString().slice(0, 11)
-      return dateString
+      return {id, date, content}
   }
 
 
