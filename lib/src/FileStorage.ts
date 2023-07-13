@@ -1,12 +1,15 @@
+require("dotenv").config()
 import jsonfile from 'jsonfile'
 import fs from 'fs';
+import {homedir} from "os"
+import {join} from "path"
 
 export default class FileStorage{
-    private static file: string
+    private static prodMeta = join(homedir(), "jottt", "prod", "meta.json")
+    private static devMeta = join(homedir(), "jottt", "dev", "meta.json")
+    private static file = process.env?.NODE_ENV === "production" ? FileStorage.prodMeta : FileStorage.devMeta
     private static baseObj: any = {}
-    public static initStorage(file: string){
-        FileStorage.file = file
-    }
+    // public static initStorage(){}
 
     // public static getAll(){
     //     const obj = jsonfile.readFileSync(FileStorage.file)
@@ -33,12 +36,15 @@ export default class FileStorage{
         try {
             fs.unlinkSync(FileStorage.file)
             while(fs.existsSync(FileStorage.file)) {
-                console.log('Error deleting file, Retrying...');
+                console.log(`Error deleting "${FileStorage.file}", Retrying...`);
                 fs.unlinkSync(FileStorage.file)
             }
-            console.log("file deleted")
+            console.log(`File "${FileStorage.file}" deleted`)
         } catch (err) {
-            console.log('Error deleting file:', err);
+            console.log(`Error deleting "${FileStorage.file}":`, err);
         }
     }
 }
+
+// FileStorage.initStorage()
+
