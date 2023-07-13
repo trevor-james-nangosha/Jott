@@ -1,19 +1,17 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { EditorStateDispatch, EntryStateDispatch, isDateToday } from '../App'
-import { JournalEntry } from '@jottt/lib'
 import { v4 as uuidv4 } from 'uuid';
-import config from '../config';
 import { useEffect } from 'react';
 import { EditorState, ContentState } from 'draft-js';
+import { JournalEntry } from "@jottt/lib";
 
 const useGetEntry = (date: Dayjs, setState: EntryStateDispatch, setEditorState: EditorStateDispatch) => {
 
     useEffect(() => {
         const getEntryAtDate = (date: Dayjs, setState: EntryStateDispatch) => {
-            const dateString = date.toDate()
-            const dateString_ = new Date(dateString.getTime()  + Math.abs(dateString.getTimezoneOffset()*60000))
+            const dateString = date.toDate().toUTCString().slice(0, 16)
             
-            fetch(`http://${config.HOST}:${config.PORT}/entries?date=${dateString_}`, {
+            fetch(`http://127.0.0.1:4001/entries?date=${dateString}`, {
                 headers: { Accept: 'application/json' },
             }).then((response) => {
                 return response.json()

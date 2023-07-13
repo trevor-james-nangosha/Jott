@@ -1,6 +1,5 @@
 import { JournalEntry } from "@jottt/lib"
 import { useEffect} from 'react'
-import config from '../config'
 
 const useAutoSave = (entry: JournalEntry) => {
   // TODO; right now this works fine, but i think we need to use a throttle instead
@@ -20,13 +19,14 @@ const useAutoSave = (entry: JournalEntry) => {
 
     const saveEntryToDb = (entry: JournalEntry) =>{
       if(entry.content){
-        const date = entry.date.toDate()
-        const dateString_ = new Date(date.getTime()  + Math.abs(date.getTimezoneOffset()*60000))
+        const date = entry.date.toDate().toUTCString().slice(0, 16) // keep the time independent of time zones, hence UTC
+        let newEntry = {...entry, date}
+        console.log(`New entry: ${newEntry}`)
 
-        fetch(`http://${config.HOST}:${config.PORT}/entries?date=${dateString_}`, {
+        fetch(`http://127.0.0.1:4001/entries`, {
                 method: 'POST',
                 headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-                body: JSON.stringify(entry)
+                body: JSON.stringify(newEntry)
         }).catch(error => console.error(error)) 
       }
     }
