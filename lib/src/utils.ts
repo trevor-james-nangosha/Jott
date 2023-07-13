@@ -22,7 +22,7 @@ export function parseEntryFromRequest(req: Request){
 export function makeDir(dir: string){
     try {
         if (existsSync(dir)) {
-            console.log("Directory exists.")
+            console.log(`Directory ${dir} already exists.`)
           } else {
             mkdirSync(dir, {recursive: true})
           }

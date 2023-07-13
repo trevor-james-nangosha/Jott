@@ -1,14 +1,10 @@
 import knex, { Knex } from "knex";
-import { DB_ERROR, DbConfig, KnexConnection, SQLITE_ERRORS } from "./types";
+import { DB_ERROR, KnexConnection, SQLITE_ERRORS } from "./types";
 import { makeDir } from "./utils";
 import { join } from 'path';
 import {homedir} from "os";
 import { open, existsSync } from 'node:fs';
 
-// const APP_BASE_DIR = join(homedir(), "jottt")
-
-// move the database functionality to lib, since if we
-// need to add, say a CLI application, we shall also need to access them
 export class DbConnectionError extends Error{
     constructor(message: string){
         super(message)
@@ -33,11 +29,6 @@ export class JotttDatabase{
         this.conn = conn_
     }
 
-    public connectDb(config: DbConfig){
-        let connection = knex(config)
-        return connection;
-    }
-
     public createDbFiles(appBaseDir: string){
         const files = [join(appBaseDir, "dev", "db-dev.sqlite3"), join(appBaseDir, "prod", "db-prod.sqlite3")]
         files.forEach(file => {
@@ -57,64 +48,25 @@ export class JotttDatabase{
         })
     }
 
-    
-
     public async readOperation(date:string|null, id:string|null){
         let flag = date ? ["date", date]: id ? ["id", id] : undefined
-        // console.log(flag)
 
         if(!flag) throw new Error(`Please provide a valid search argument. Either one of "id" or "date".`)
 
         let localEntryResults = await this.conn('entries').select('*').where(flag[0], flag[1]) 
-        return localEntryResults;
-        
-        // if (localEntryResults.length) {
-        //     return localEntryResults
-        // } else {
-        //     // TODO; debug and test this.....'ts too hacky for now.
-        //     let remoteEntryResults: any[] = []
-
-        //     if (flag[0] === "date") {
-        //         remoteEntryResults = await sync.getRemoteEntryByDate(flag[1])
-        //     } else if (flag[0] === "id") {
-        //         remoteEntryResults = await sync.getRemoteEntryById(flag[1])
-        //     }
-    
-        //     return remoteEntryResults
-        // }
+        return localEntryResults;        
     }
 
     public async postOperation(entry: any){
         await this.saveOrUpdateEntry(entry)
     }
     
-    private async saveOrUpdateEntry(entry: any){
-    const result = await this.entryExists(entry)
-    if (!result) {
-        try {
-            await this.conn('entries').insert({...entry}).then(async _ => {
-            })
-        } catch (error) {
-            console.error(error)
-        }  
-    } else {
-        const {content, id} = entry
-        await this.conn('entries').where("id", id).update("content", content)
+    private async saveOrUpdateEntry(entry: any){    
+        await this.conn('entries').insert({...entry}).catch(async () => {
+            const {content, id} = entry
+            await this.conn('entries').where("id", id).update("content", content)  
+        })
     }
-}
-
-    public async entryExists(entry: any){
-        const date = entry.date
-        try {
-            const result = await this.conn('entries').select('*').where('date', date)  
-            if(result.length) return true
-            return false
-        } catch (error) {
-            console.error(error)
-            return false
-        }
-    }
-
 }
 
 export default {

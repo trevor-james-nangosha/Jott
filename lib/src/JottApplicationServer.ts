@@ -1,7 +1,7 @@
 import express, { json, urlencoded } from "express";
 import cors from "cors";
 import { JotttDatabase } from "./JotttDatabase";
-import { Config, DbConfig, KnexConnection } from "./types";
+import {KnexConnection } from "./types";
 import { parseEntryFromRequest } from "./utils";
 
 export default class JottApplicationServer{

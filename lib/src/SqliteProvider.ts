@@ -3,14 +3,14 @@
 // database classes
 
 import knex from "knex";
-import { DB_ERROR, DbConfig, KnexConnection, SQLITE_ERRORS } from "./types";
+import { DB_ERROR, KnexConnection, SQLITE_ERRORS } from "./types";
 import { DbConnectionError } from "./JotttDatabase";
 
 export default class SqliteProvider{
     private static conn: KnexConnection
     private static migrationDir: string;
 
-    public static getSqliteConnection(config_: DbConfig, migrationDir_: string): KnexConnection {
+    public static getSqliteConnection(config_: any, migrationDir_: string): KnexConnection {
         if (!SqliteProvider.conn) {
             SqliteProvider.migrationDir = migrationDir_
             SqliteProvider.conn = SqliteProvider.connectDb(config_)
@@ -21,7 +21,7 @@ export default class SqliteProvider{
         return SqliteProvider.conn;
       }
     
-    private static connectDb(config: DbConfig): KnexConnection{
+    private static connectDb(config: any): KnexConnection{
         let connection = knex(config)
         return connection;
     }
