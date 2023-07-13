@@ -1,12 +1,12 @@
 require("dotenv").config()
-const { app, BrowserWindow, } = require('electron');
-const {SqliteProvider, JottApplicationServer, Synchroniser} = require("@jottt/lib")
+const { SqliteProvider, JottApplicationServer, Synchroniser } = require("@jottt/lib");
 const { join } = require('path');
 const { format } = require('url');
+const { app, BrowserWindow } = require('electron');
 const config = require("./config");
 
-const sqliteConn = SqliteProvider.getSqliteConnection(config, "./migrations")
-const appServer = new JottApplicationServer(sqliteConn);
+const sqliteConn = SqliteProvider.getSqliteConnection(config.dbConfig, "./migrations")
+const appServer = new JottApplicationServer(sqliteConn, config.appBaseDir);
 Synchroniser.setSqliteConnection(sqliteConn)
 
 function createWindow() {
@@ -22,37 +22,30 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            devTools: false
+            devTools: true
         }
     });
-
-    win.once("ready-to-show", () => {
-        Synchroniser.emitStartBackup();
-    })
 
     win.loadURL(startUrl);
     win.webContents.openDevTools()
-
-    app.on('window-all-closed', () => {
-        if (process.platform !== 'darwin') {
-            // the app server is closed automatically when the windows are closed,
-            // but for any reason it can fail to close. It is better to hedge against this by killing
-            // the server manually
-            appServer.killServer()
-            app.quit()
-        }
-    });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    Synchroniser.createSyncSubProcess()        
+    createWindow()
+});
+
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
+        appServer.killServer()
         app.quit()
     }
 });
 
-app.on('activate', async () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow()
-    }
-});
+// i find this block useless, but it is in the electron docs...
+// ...so i will leave it here for now
+// app.on('activate', async () => {
+//     if (BrowserWindow.getAllWindows().length === 0) {
+//         createWindow()
+//     }
+// });
