@@ -1,12 +1,16 @@
+require("dotenv").config()
 import { KnexConnection } from "./types";
 import http from "http";
 import { AuthTypes, Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
 import mysql from 'mysql2/promise';
 import { spawn } from 'child_process';
 import EventEmitter from 'events';
+import {homedir} from "os"
+import {join} from "path"
 import retry from 'retry';
 import fs from 'fs';
 import FileStorage from "./FileStorage";
+import { makeDir } from "./utils";
 
 /**
      * This class manages all access with the remote database and entries.
@@ -49,13 +53,23 @@ export default class Synchroniser{
     }
 
     public static syncProcessExists(){
-        let jsonFileExists = fs.existsSync("./meta.json")
+        let devMeta = join(homedir(), "jottt", "dev", "meta.json")
+        let prodMeta = join(homedir(), "jottt", "prod", "meta.json")
+        let jsonFileExists = fs.existsSync(process.env?.NODE_ENV === "production" ? prodMeta : devMeta)
         if (jsonFileExists) return true
         return false
     }
 
     public static createSyncSubProcess(){
-        const fileDesc = fs.openSync("./sync.log", "a");
+        let fileDesc: number
+        if (process.env?.NODE_ENV === "production") {
+            makeDir(join(homedir(), "jottt", "prod", "logs"))    
+            fileDesc = fs.openSync(join(homedir(), "jottt", "prod", "logs", "sync.log"), "a");
+        } else {
+            makeDir(join(homedir(), "jottt", "dev", "logs"))
+            fileDesc = fs.openSync(join(homedir(), "jottt", "dev", "logs", "sync.log"), "a");
+        }
+
         const childProcess = spawn('node', ['./backupAndSync.js'], {
             detached: true,
             stdio: [fileDesc, fileDesc, fileDesc]

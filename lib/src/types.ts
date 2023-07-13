@@ -26,35 +26,35 @@ export enum SQLITE_ERRORS {
     ER_NO_SUCH_TABLE = 1
 }
 
-export interface DbConfigConnection{
-    host?: string,
-    port?: number, 
-    user?: string, 
-    password?: string,
-    database?: string,
-    filename?: string
-}
+// export interface DbConfigConnection{
+//     host?: string,
+//     port?: number, 
+//     user?: string, 
+//     password?: string,
+//     database?: string,
+//     filename?: string
+// }
 
-export interface DbConfig{
-    client: string,
-    connection: DbConfigConnection,
-    pool?: {
-        min: number,
-        max: number
-    },
-    migrations?: {
-        tableName: string
-    }
-}
+// export interface DbConfig{
+//     client: string,
+//     connection: DbConfigConnection,
+//     pool?: {
+//         min: number,
+//         max: number
+//     },
+//     migrations?: {
+//         tableName: string
+//     }
+// }
 
-export interface Config{
-    HOST: string;
-    PORT: string;
-    homeDir: string;
-    dbProd: string;
-    dbDev: string;
-    appBaseDir: string;
-    fileStorage: string
-}
+// export interface Config{
+//     HOST: string;
+//     PORT: string;
+//     homeDir: string;
+//     dbProd: string;
+//     dbDev: string;
+//     appBaseDir: string;
+//     fileStorage: string
+// }
 
 export type KnexConnection = Knex;
