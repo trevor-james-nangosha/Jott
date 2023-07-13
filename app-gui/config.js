@@ -1,37 +1,19 @@
-require('dotenv').config()
-const {homedir} = require("os")
-const { join } = require('path');
-const APP_BASE_DIR = join(homedir(), "jottt")
-
-
-let nodeEnv = process.env?.NODE_ENV
-let client = (nodeEnv === "production") ? "sqlite3" : "mysql"
-
-let configDev = {
-    client,
-    connection:{
-        host: process.env?.DATABASE_HOST,
-        port : parseInt(process.env?.DATABASE_PORT),
-        user : process.env?.DATABASE_USER,
-        password : process.env?.DATABASE_PASSWORD,
-        database : process.env?.DATABASE
-    },
-    pool: {
-        min: 2,
-        max: 10
-    },
-    migrations: {
-        tableName: "knex_migrations"
+var _a, _b, _c;
+require('dotenv').config();
+var homedir = require("os").homedir;
+var join = require('path').join;
+var APP_BASE_DIR = join(homedir(), "jottt");
+var dbDev = join(APP_BASE_DIR, "dev", "db-dev.sqlite3");
+var dbProd = join(APP_BASE_DIR, "prod", "db-prod.sqlite3");
+var nodeEnv = (_a = process.env) === null || _a === void 0 ? void 0 : _a.NODE_ENV;
+var config = {
+    appBaseDir: APP_BASE_DIR,
+    dbConfig: {
+        client: "sqlite3",
+        connection: {
+            filename: (nodeEnv === "production") ? dbProd : dbDev
+        }
     }
-}
-
-let configProd = {
-    client,
-    connection: {
-        filename: join(APP_BASE_DIR, "prod", "db-prod.sqlite3"), 
-    },
-}
-
-let config = (nodeEnv === "production") ? configProd : configDev
-
-module.exports = config
+};
+console.log("config.dbconfig.connection.filename: ".concat(JSON.stringify((_c = (_b = config.dbConfig) === null || _b === void 0 ? void 0 : _b.connection) === null || _c === void 0 ? void 0 : _c.filename)));
+module.exports = config;
