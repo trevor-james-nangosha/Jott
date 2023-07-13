@@ -7,7 +7,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@jottt/lib": "^1.0.1",
+    "@jottt/lib": "^1.0.3",
     "@mui/material": "^5.11.15",
     "@mui/x-date-pickers": "^6.0.3",
     "@testing-library/jest-dom": "^5.16.5",
@@ -18,15 +18,12 @@
     "@types/react": "^18.0.30",
     "@types/react-dom": "^18.0.11",
     "@types/uuid": "^9.0.1",
-    "assert": "^2.0.0",
     "crypto-browserify": "^3.12.0",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "draft-convert": "^2.1.13",
     "knex": "^2.4.2",
     "mysql": "^2.18.1",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-draft-wysiwyg": "^1.15.0",
@@ -70,8 +67,14 @@
     "@types/draft-convert": "^2.1.4",
     "@types/draft-js": "^0.11.10",
     "@types/react-draft-wysiwyg": "^1.13.4",
+    "assert": "^2.0.0",
     "electron": "^25.1.0",
-    "electron-builder": "^23.6.0"
+    "electron-builder": "^23.6.0",
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "react-app-rewired": "^2.2.1",
+    "webpack": "^5.88.1"
   },
   "build": {
     "mac": {
