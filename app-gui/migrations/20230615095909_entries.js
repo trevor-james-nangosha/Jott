@@ -3,8 +3,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = async function(knex) {
-    const insertTrigger = `\
+exports.up = async function (knex) {
+	const insertTrigger = `\
     CREATE TRIGGER content_insert_trigger\
     AFTER INSERT\
     ON entries\
@@ -13,9 +13,9 @@ exports.up = async function(knex) {
         INSERT INTO entries_changes (content, id)\
         VALUES (NEW.content, NEW.id);\
     END;\
-    `
+    `;
 
-    const updateTrigger = `\
+	const updateTrigger = `\
     CREATE TRIGGER content_update_trigger\
     AFTER UPDATE OF content ON entries\
     FOR EACH ROW\
@@ -25,30 +25,28 @@ exports.up = async function(knex) {
             sync_state = "pending"\
         WHERE id = NEW.id;\
     END;\
-    `
+    `;
 
-    await knex.schema.createTableIfNotExists("entries", table => {
-        table.string('id')
-        table.string('date')
-        table.text('content')
-        table.timestamps(true, true, true)
+	await knex.schema.createTableIfNotExists("entries", (table) => {
+		table.string("id");
+		table.string("date");
+		table.text("content");
+		table.timestamps(true, true, true);
 
-        table.primary(['id'])
-    })
+		table.primary(["id"]);
+	});
 
-    await knex.raw(insertTrigger).catch(err => console.error(err))
-    await knex.raw(updateTrigger).catch(err => console.error(err))
-
+	await knex.raw(insertTrigger).catch((err) => console.error(err));
+	await knex.raw(updateTrigger).catch((err) => console.error(err));
 };
 
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = async function(knex) {
-    await knex.schema.dropTable('entries');
+exports.down = async function (knex) {
+	await knex.schema.dropTable("entries");
 };
-
 
 //TODO;
 // right now there are a lot of issues with how these migrations are run

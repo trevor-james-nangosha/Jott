@@ -3,4 +3,4 @@
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
-module.exports = require("./config")
+module.exports = require("./config");

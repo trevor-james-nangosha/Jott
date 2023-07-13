@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { Synchroniser, SqliteProvider } = require("@jottt/lib");
-const config = require("./config")
+const config = require("./config");
 
-const sqliteConn = SqliteProvider.getSqliteConnection(config.dbConfig, "./migrations")
+const sqliteConn = SqliteProvider.getSqliteConnection(
+	config.dbConfig,
+	"./migrations"
+);
 
-Synchroniser.setSqliteConnection(sqliteConn)
+Synchroniser.setSqliteConnection(sqliteConn);
 
 if (Synchroniser.setSyncPid(process.pid)) {
-    Synchroniser.emitStartBackup()
+	Synchroniser.emitStartBackup();
 }
-    
-

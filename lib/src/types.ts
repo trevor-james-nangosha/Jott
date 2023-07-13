@@ -1,35 +1,34 @@
-
-import dayjs from 'dayjs'
-import { Knex } from 'knex';
+import dayjs from "dayjs";
+import { Knex } from "knex";
 
 // provide type support for stuff like this that is giving me a hard time
 // import Synchroniser from './Synchroniser';
 // /// <reference path="../@types/" />
 
-export interface JournalBase{
-    id: string;
-    date: dayjs.Dayjs;
-    content: string;
+export interface JournalBase {
+	id: string;
+	date: dayjs.Dayjs;
+	content: string;
 }
 
-export interface JournalEntry extends JournalBase{
-    createdAt?:Date;
-    updatedAt?: Date;
+export interface JournalEntry extends JournalBase {
+	createdAt?: Date;
+	updatedAt?: Date;
 }
 
 export declare enum DB_ERROR {
-    ECONNREFUSED            = "ECONNREFUSED",
-    ER_NO_SUCH_TABLE      = "ER_NO_SUCH_TABLE",
+	ECONNREFUSED = "ECONNREFUSED",
+	ER_NO_SUCH_TABLE = "ER_NO_SUCH_TABLE",
 }
 
 export enum SQLITE_ERRORS {
-    ER_NO_SUCH_TABLE = 1
+	ER_NO_SUCH_TABLE = 1,
 }
 
 // export interface DbConfigConnection{
 //     host?: string,
-//     port?: number, 
-//     user?: string, 
+//     port?: number,
+//     user?: string,
 //     password?: string,
 //     database?: string,
 //     filename?: string
