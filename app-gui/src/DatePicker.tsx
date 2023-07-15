@@ -9,6 +9,7 @@ dayjs.extend(customParseFormat);
 export interface DatePickerProps {
 	date?: Dayjs;
 	setDate?: (value: any) => void;
+	onSelect?: () => void;
 }
 
 function DatePicker(props: DatePickerProps) {
@@ -18,7 +19,15 @@ function DatePicker(props: DatePickerProps) {
 				<StaticDatePicker
 					value={props.date}
 					disableFuture
-					onChange={props.setDate}
+					onChange={(value) => {
+						if (props.setDate) {
+							props.setDate(value);
+						}
+
+						if (props.onSelect) {
+							props.onSelect();
+						}
+					}}
 				/>
 			</LocalizationProvider>
 		</div>

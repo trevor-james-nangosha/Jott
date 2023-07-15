@@ -1,5 +1,3 @@
-import TextEditor from "./TextEditor";
-import DatePicker from "./DatePicker";
 import { JournalEntry } from "@jottt/lib";
 import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
@@ -9,6 +7,9 @@ import { EditorState, convertToRaw } from "draft-js";
 import useAutoSave from "./hooks/useAutoSave";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import "./App.css";
+import Sidebar from "./Sidebar";
+import TextEditor from "./TextEditor";
+import Box from "@mui/material/Box";
 
 export type EntryStateDispatch = React.Dispatch<
 	React.SetStateAction<JournalEntry>
@@ -35,7 +36,6 @@ function App() {
 		const contentStateObject = convertToRaw(html);
 
 		const blocks = contentStateObject["blocks"];
-		// console.log(blocks)
 		let newString = "";
 
 		blocks.forEach((block) => {
@@ -53,13 +53,13 @@ function App() {
 	useAutoSave(state);
 
 	return (
-		<div className="App">
-			<DatePicker date={date} setDate={setDate} />
+		<Box sx={{ display: "flex", marginTop: "3%", marginLeft: "3%" }}>
+			<Sidebar date={date} setDate={setDate} />
 			<TextEditor
 				editorState={editorState}
 				setEditorState={setEditorState}
 			/>
-		</div>
+		</Box>
 	);
 }
 

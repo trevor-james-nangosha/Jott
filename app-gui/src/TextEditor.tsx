@@ -11,17 +11,13 @@ export interface TextEditorProps {
 
 export default function TextEditor(props: TextEditorProps) {
 	return (
-		<>
-			<Editor
-				editorState={props.editorState}
-				onEditorStateChange={props.setEditorState}
-				wrapperClassName="text-editor-container"
-				editorClassName="text-editor"
-				toolbar={{
-					options: ["inline"],
-				}}
-				toolbarClassName="toolbar-class"
-			/>
-		</>
+		<Editor
+			editorState={props.editorState}
+			onEditorStateChange={props.setEditorState}
+			wrapperClassName="text-editor-container"
+			editorClassName="text-editor"
+			toolbarHidden
+			toolbarClassName="toolbar-class"
+		/>
 	);
 }
