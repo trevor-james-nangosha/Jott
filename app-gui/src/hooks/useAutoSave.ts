@@ -1,5 +1,7 @@
-import { JournalEntry } from "@jottt/lib";
+import { JournalEntry, getLogger } from "@jottt/lib";
 import { useEffect } from "react";
+
+const logger = getLogger();
 
 const useAutoSave = (entry: JournalEntry) => {
 	// TODO; right now this works fine, but i think we need to use a throttle instead
@@ -21,7 +23,7 @@ const useAutoSave = (entry: JournalEntry) => {
 			if (entry.content) {
 				const date = entry.date.toDate().toUTCString().slice(0, 16); // keep the time independent of time zones, hence UTC
 				const newEntry = { ...entry, date };
-				console.log(`New entry: ${newEntry}`);
+				logger.debug(`New entry: ${newEntry}`);
 
 				fetch(`http://127.0.0.1:4001/entries`, {
 					method: "POST",
@@ -30,7 +32,7 @@ const useAutoSave = (entry: JournalEntry) => {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify(newEntry),
-				}).catch((error) => console.error(error));
+				}).catch((error) => logger.error(error));
 			}
 		};
 

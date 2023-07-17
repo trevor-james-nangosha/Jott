@@ -39,7 +39,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-	Synchroniser.createSyncSubProcess();
+	// Synchroniser.createSyncSubProcess();
 	createWindow();
 });
 

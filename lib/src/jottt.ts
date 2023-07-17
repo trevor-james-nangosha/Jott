@@ -3,6 +3,7 @@ import JottApplicationServer from "./JottApplicationServer";
 import Synchroniser from "./Synchroniser";
 import SqliteProvider from "./SqliteProvider";
 import FileStorage from "./FileStorage";
+import { getLogger } from "./utils";
 
 module.exports = {
 	JottApplicationServer,
@@ -10,4 +11,5 @@ module.exports = {
 	Synchroniser,
 	JotttDatabase,
 	FileStorage,
+	getLogger
 };

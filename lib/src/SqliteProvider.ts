@@ -1,10 +1,9 @@
-// since the synchroniser and database classes will need access to the same sqlite
-// connection, we shall have that connection passed to the synchroniser and
-// database classes
-
 import knex from "knex";
 import { DB_ERROR, KnexConnection, SQLITE_ERRORS } from "./types";
 import { DbConnectionError } from "./JotttDatabase";
+import { getLogger } from "./utils";
+
+const logger = getLogger();
 
 export default class SqliteProvider {
 	private static conn: KnexConnection;
@@ -44,7 +43,7 @@ export default class SqliteProvider {
 								//the reason this migration will not run is actually quite simple......we do
 								// not have a knexfile in this current directory. so it looks like we are going to do a  "manual"
 								// "entries" table creation using raw SQL.
-								console.error(
+								logger.error(
 									`Error from trying migrations while testing connection: ${error}`
 								);
 							}
@@ -57,7 +56,7 @@ export default class SqliteProvider {
 								"CREATE TABLE `entries` (`id` varchar(255), `date` varchar(255), `content` text, `createdAt` datetime not null default CURRENT_TIMESTAMP, `updatedAt` datetime not null default CURRENT_TIMESTAMP, primary key (`id`));"
 							)
 							.catch((err) => {
-								console.error(
+								logger.error(
 									`\nCould not create table entries in MySQL: ${err}\n`
 								);
 							});
@@ -78,9 +77,8 @@ export default class SqliteProvider {
 				directory: SqliteProvider.migrationDir,
 				disableTransactions,
 			})
-			.then((val) => {
-				console.log("done running migrations.");
-				console.log(val);
+			.then(() => {
+				logger.info("done running migrations.");
 			});
 	}
 }

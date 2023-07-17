@@ -4,6 +4,9 @@ import jsonfile from "jsonfile";
 import fs from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { getLogger } from "./utils";
+
+const logger = getLogger()
 
 export default class FileStorage {
 	private static prodMeta = join(homedir(), "jottt", "prod", "meta.json");
@@ -47,14 +50,14 @@ export default class FileStorage {
 		try {
 			fs.unlinkSync(FileStorage.file);
 			while (fs.existsSync(FileStorage.file)) {
-				console.log(
+				logger.info(
 					`Error deleting "${FileStorage.file}", Retrying...`
 				);
 				fs.unlinkSync(FileStorage.file);
 			}
-			console.log(`File "${FileStorage.file}" deleted`);
+			logger.info(`File "${FileStorage.file}" deleted`);
 		} catch (err) {
-			console.log(`Error deleting "${FileStorage.file}":`, err);
+			logger.info(`Error deleting "${FileStorage.file}":`, err);
 		}
 	}
 }

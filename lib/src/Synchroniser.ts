@@ -15,7 +15,9 @@ import { join } from "path";
 import retry from "retry";
 import fs from "fs";
 import FileStorage from "./FileStorage";
-import { makeDir } from "./utils";
+import { getAppEnvBaseDir, getLogger } from "./utils";
+
+const logger = getLogger()
 
 /**
  * This class manages all access with the remote database and entries.
@@ -37,25 +39,25 @@ export default class Synchroniser {
 
 	public static setSyncPid(pid: any) {
 		if (!Synchroniser.syncProcessExists()) {
-			console.log(`Set sync process, pid: ${pid}`);
+			logger.info(`Set sync process, pid: ${pid}`);
 			FileStorage.setItem("syncPid", process.pid);
 			Synchroniser.syncPid = pid;
 			return true;
 		} else {
-			console.log(`Sync process is already running.`);
+			logger.info(`Sync process is already running.`);
 			return false;
 		}
 	}
 
 	private static killSyncProcess() {
 		if (Synchroniser.syncProcessExists()) {
-			console.log(
+			logger.info(
 				`Terminating sync process with pid: ${Synchroniser.syncPid}`
 			);
 			FileStorage.deleteAll();
 			process.kill(Synchroniser.syncPid);
 		} else {
-			console.log(`No currently running sync process to kill.`);
+			logger.info(`No currently running sync process to kill.`);
 		}
 	}
 
@@ -70,20 +72,7 @@ export default class Synchroniser {
 	}
 
 	public static createSyncSubProcess() {
-		let fileDesc: number;
-		if (process.env?.NODE_ENV === "production") {
-			makeDir(join(homedir(), "jottt", "prod", "logs"));
-			fileDesc = fs.openSync(
-				join(homedir(), "jottt", "prod", "logs", "sync.log"),
-				"a"
-			);
-		} else {
-			makeDir(join(homedir(), "jottt", "dev", "logs"));
-			fileDesc = fs.openSync(
-				join(homedir(), "jottt", "dev", "logs", "sync.log"),
-				"a"
-			);
-		}
+		const fileDesc = fs.openSync(join(getAppEnvBaseDir(), "logs", "sync.log"), "a")
 
 		const childProcess = spawn("node", ["./backupAndSync.js"], {
 			detached: true,
@@ -108,7 +97,7 @@ export default class Synchroniser {
 			const req = http.request(options, (res) => {
 				// Check the response status code
 				if (res.statusCode === 200) {
-					console.log(
+					logger.info(
 						`Will proceed with backup. Internet connection is active.`
 					);
 					resolve(true);
@@ -145,7 +134,7 @@ export default class Synchroniser {
 	}
 
 	private static async closeConnections() {
-		console.log(`Closing connection to remote database.`);
+		logger.info(`Closing connection to remote database.`);
 		await Synchroniser.pool.end();
 		Synchroniser.connector.close();
 	}
@@ -185,10 +174,10 @@ export default class Synchroniser {
 		});
 
 		operation.attempt(async (currentAttempt: number) => {
-			console.log(`Attempt number: ${currentAttempt}`);
+			logger.info(`Attempt number: ${currentAttempt}`);
 			const isConnectionActive =
 				await Synchroniser.hasInternetConnection().catch((err) => {
-					console.log(
+					logger.info(
 						`Could not find internet connection. Retrying.`
 					);
 					if (operation.retry(err)) return;
@@ -204,7 +193,7 @@ export default class Synchroniser {
 				});
 
 				operationGoogle.attempt(async (currentAttempt: number) => {
-					console.log(`Attempt number for GCP: ${currentAttempt}`);
+					logger.info(`Attempt number for GCP: ${currentAttempt}`);
 					await Synchroniser.tryConnectGoogleCloud()
 						.then(async (conn) => {
 							Synchroniser.conn = conn;
@@ -216,7 +205,7 @@ export default class Synchroniser {
 								.where("sync_state", "pending");
 
 							if (!pendingEntries.length) {
-								console.log(
+								logger.info(
 									`Cannot begin sync as all entries have been synced/there are no entries to sync..`
 								);
 								Synchroniser.closeConnections();
@@ -224,7 +213,7 @@ export default class Synchroniser {
 								return;
 							} else {
 								if (Synchroniser.conn) {
-									console.log(
+									logger.info(
 										`Found ${pendingEntries.length} entries to sync.`
 									);
 									Synchroniser.backupEntries(
@@ -263,7 +252,7 @@ export default class Synchroniser {
 						Object.values(needSyncingEntry)
 					)
 					.then(() => {
-						console.log(
+						logger.info(
 							`Synced entry with id: ${needSyncingEntry.id}`
 						);
 						resolve({ backupDone: true });
@@ -279,7 +268,7 @@ export default class Synchroniser {
 									]
 								)
 								.then(() => {
-									console.log(
+									logger.info(
 										`Synced entry with id: ${needSyncingEntry.id}`
 									);
 									resolve({ backupDone: true });
@@ -294,7 +283,7 @@ export default class Synchroniser {
 						`UPDATE entries_changes SET last_synced = CURRENT_TIMESTAMP, sync_state = "done" where id = "${needSyncingEntry.id}"`
 					)
 					.catch((err) => {
-						console.error(
+						logger.error(
 							`could not set sync_state to "done": ${err}`
 						);
 					});
@@ -318,7 +307,7 @@ export default class Synchroniser {
 		);
 		const remoteChanges = remoteChanges_[0];
 		if (!remoteChanges.length) {
-			console.log(`No remote changes found.`);
+			logger.info(`No remote changes found.`);
 			return;
 		} else {
 			// TODO; move this to a separate function
@@ -339,7 +328,7 @@ export default class Synchroniser {
 							);
 						})
 						.catch((err) => {
-							console.error(
+							logger.error(
 								`Could not insert remote entry into local database: ${err}`
 							);
 						});
@@ -348,7 +337,7 @@ export default class Synchroniser {
 						.where("id", entry.id)
 						.update(entry)
 						.catch((err) => {
-							console.error(
+							logger.error(
 								`Could not update remote entry in local database: ${err}`
 							);
 						});

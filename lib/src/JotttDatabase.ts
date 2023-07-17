@@ -1,8 +1,9 @@
 import { KnexConnection } from "./types";
-import { makeDir } from "./utils";
+import { getLogger, makeDir } from "./utils";
 import { join } from "path";
 import { open, existsSync } from "node:fs";
 
+const logger = getLogger();
 export class DbConnectionError extends Error {
 	constructor(message: string) {
 		super(message);
@@ -36,7 +37,7 @@ export class JotttDatabase {
 			if (!existsSync(file)) {
 				open(file, "w", function (err) {
 					if (err) throw err;
-					console.log("Files have been created!!!!!!!!");
+					logger.info("Files have been created!!!!!!!!");
 				});
 			}
 		});
