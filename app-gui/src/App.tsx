@@ -10,6 +10,7 @@ import "./App.css";
 import Sidebar from "./Sidebar";
 import TextEditor from "./TextEditor";
 import Box from "@mui/material/Box";
+import SearchModal from "./SearchModal";
 
 export type EntryStateDispatch = React.Dispatch<
 	React.SetStateAction<JournalEntry>
@@ -26,7 +27,8 @@ export function isDateToday(date: Dayjs): boolean {
 function App() {
 	const defaultState = { id: uuidv4(), date: dayjs(new Date()), content: "" };
 	const [state, setState] = useState<JournalEntry>(defaultState);
-	const [date, setDate] = useState<Dayjs>(dayjs(new Date()));
+	const [date, setDate] = useState<Dayjs>(dayjs(new Date())); // the date picker
+	const [modalOpen, setModalOpen] = useState(false);
 	const [editorState, setEditorState] = useState(() =>
 		EditorState.createEmpty()
 	);
@@ -52,12 +54,32 @@ function App() {
 	useGetEntry(date, setState, setEditorState);
 	useAutoSave(state);
 
+	useEffect(() => {
+		const handleKeyDown = (event: any) => {
+			if (event.ctrlKey && event.key === "m") {
+				setModalOpen(true);
+			}
+		};
+
+		document.addEventListener("keydown", handleKeyDown);
+
+		// Clean up the event listener on component unmount
+		return () => {
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, []);
+
 	return (
 		<Box sx={{ display: "flex", marginTop: "3%", marginLeft: "3%" }}>
 			<Sidebar date={date} setDate={setDate} />
 			<TextEditor
 				editorState={editorState}
 				setEditorState={setEditorState}
+			/>
+			<SearchModal
+				modalOpen={modalOpen}
+				setModalOpen={setModalOpen}
+				setDate={setDate}
 			/>
 		</Box>
 	);

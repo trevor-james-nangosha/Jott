@@ -50,18 +50,18 @@ export class JotttDatabase {
 		});
 	}
 
-	public async readOperation(date: string | null, id: string | null) {
-		const flag = date ? ["date", date] : id ? ["id", id] : undefined;
-
-		if (!flag)
-			throw new Error(
-				`Please provide a valid search argument. Either one of "id" or "date".`
-			);
-
-		const localEntryResults = await this.conn("entries")
+	public async getEntryWithDate(date: string | null) {
+		const entries = await this.conn("entries")
 			.select("*")
-			.where(flag[0], flag[1]);
-		return localEntryResults;
+			.where("date", date);
+		return entries;
+	}
+
+	public async getEntriesWithContent(content: string) {
+		const entries = await this.conn.raw(
+			`select * from entries where content like "%${content}%"`
+		);
+		return entries;
 	}
 
 	public async postOperation(entry: any) {

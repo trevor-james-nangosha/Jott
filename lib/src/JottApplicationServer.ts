@@ -50,7 +50,14 @@ export default class JottApplicationServer {
 
 		this.app.get("/entries", async (req, res) => {
 			const date = req.query.date as string;
-			res.json(await this.db.readOperation(date, null));
+			const content = req.query.content as string;
+
+			if (date) {
+				res.json(await this.db.getEntryWithDate(date));
+			} else {
+				res.json(await this.db.getEntriesWithContent(content));
+			}
+
 		});
 
 		this.app.post("/entries", async (req, res) => {

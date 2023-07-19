@@ -3,9 +3,9 @@ import { EditorStateDispatch, EntryStateDispatch, isDateToday } from "../App";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect } from "react";
 import { EditorState, ContentState } from "draft-js";
-import { JournalEntry, getLogger } from "@jottt/lib";
+import { JournalEntry } from "@jottt/lib";
 
-const logger = getLogger();
+// const logger = getLogger();
 
 const useGetEntry = (
 	date: Dayjs,
@@ -36,7 +36,7 @@ const useGetEntry = (
 						setEditorContent("", setEditorState);
 					}
 				})
-				.catch((error) => logger.error(error));
+				.catch((error) => console.error(error));
 		};
 
 		const setEditorContent = (
